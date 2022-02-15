@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+from fraud_detector.utils import get_abs_path
+from sklearn.model_selection import train_test_split
+from typing import Tuple
 
 
 def load_data(file_path: str = "data/dataset_TakeHome.csv") -> pd.DataFrame:
@@ -11,21 +14,26 @@ def load_data(file_path: str = "data/dataset_TakeHome.csv") -> pd.DataFrame:
     Returns:
         pd.DataFrame: dataset as dataframe
     """
-    return pd.read_csv(file_path)
+    return pd.read_csv(get_abs_path(file_path))
 
 
-def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_data(
+    df: pd.DataFrame, target_var: str = "Outcome"
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Preprocesses the dataframe by removing unnecessary columns and rows.
 
     Args:
         df (pd.DataFrame): The dataframe to clean.
 
     Returns:
-        pd.DataFrame: cleaned dataframe
+        Tuple[np.ndarray]: X_train, X_test, y_train, y_tes
     """
     df = _clean_data(df)
     df = _feature_selection(df)
-    return df
+    # X_train, X_test, y_train, y_test
+    return train_test_split(
+        df.drop(columns=[target_var]), df[target_var], test_size=0.2, random_state=42
+    )
 
 
 def _clean_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -37,8 +45,8 @@ def _clean_data(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: cleaned dataframe
     """
-    df = df.drop_duplicates(inplace=True)
-    df = df.dropna(inplace=True)
+    df.drop_duplicates(inplace=True)
+    df.dropna(inplace=True)
     return df
 
 
